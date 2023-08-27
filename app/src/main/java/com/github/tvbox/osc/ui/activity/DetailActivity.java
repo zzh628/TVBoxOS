@@ -1,6 +1,7 @@
 package com.github.tvbox.osc.ui.activity;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -76,6 +77,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -102,6 +104,7 @@ public class DetailActivity extends BaseActivity {
     private ImageView ivThumb;
     private TextView tvName;
     private TextView tvYear;
+    private TextView tvNote;
     private TextView tvSite;
     private TextView tvArea;
     private TextView tvLang;
@@ -161,6 +164,7 @@ public class DetailActivity extends BaseActivity {
         ivThumb.setVisibility(!showPreview ? View.VISIBLE : View.GONE);
         tvName = findViewById(R.id.tvName);
         tvYear = findViewById(R.id.tvYear);
+        tvNote = findViewById(R.id.tvNote);
         tvSite = findViewById(R.id.tvSite);
         tvArea = findViewById(R.id.tvArea);
         tvLang = findViewById(R.id.tvLang);
@@ -208,9 +212,6 @@ public class DetailActivity extends BaseActivity {
             }
         };
         mSeriesGroupView.setAdapter(seriesGroupAdapter);
-
-        //禁用播放地址焦点
-        tvPlayUrl.setFocusable(false);
 
         llPlayerFragmentContainerBlock.setOnClickListener((view -> toggleFullPreview()));
 
@@ -295,11 +296,11 @@ public class DetailActivity extends BaseActivity {
         tvPlayUrl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //获取剪切板管理器
-                ClipboardManager cm = (ClipboardManager)getSystemService(mContext.CLIPBOARD_SERVICE);
-                //设置内容到剪切板
-                cm.setPrimaryClip(ClipData.newPlainText(null, tvPlayUrl.getText().toString().replace("播放地址：","")));
-                Toast.makeText(DetailActivity.this, "已复制", Toast.LENGTH_SHORT).show();
+                ClipboardManager clipboard = (ClipboardManager) DetailActivity.this.getSystemService(Context.CLIPBOARD_SERVICE);
+                String cpContent = Objects.requireNonNull(vodInfo.seriesMap.get(vodInfo.playFlag)).get(vodInfo.playIndex).url;
+                ClipData clipData = ClipData.newPlainText(null, cpContent);
+                clipboard.setPrimaryClip(clipData);
+                Toast.makeText(DetailActivity.this, "已复制" + cpContent, Toast.LENGTH_SHORT).show();
             }
         });
         mGridView.setOnItemListener(new TvRecyclerView.OnItemListener() {
@@ -456,8 +457,6 @@ public class DetailActivity extends BaseActivity {
     private void jumpToPlay() {
         if (vodInfo != null && vodInfo.seriesMap.get(vodInfo.playFlag).size() > 0) {
             preFlag = vodInfo.playFlag;
-            //更新播放地址
-            setTextShow(tvPlayUrl, "播放地址：", vodInfo.seriesMap.get(vodInfo.playFlag).get(vodInfo.playIndex).url);
             Bundle bundle = new Bundle();
             //保存历史
             insertVod(firstsourceKey, vodInfo);
@@ -529,7 +528,7 @@ public class DetailActivity extends BaseActivity {
         int screenWidth = getWindowManager().getDefaultDisplay().getWidth()/3;
         int offset = screenWidth/w;
         if(offset <=2) offset =2;
-        if(offset > 6) offset =6;
+        if(offset > 6) offset =10;
         mGridViewLayoutMgr.setSpanCount(offset);
         seriesAdapter.setNewData(vodInfo.seriesMap.get(vodInfo.playFlag));
 
@@ -549,7 +548,7 @@ public class DetailActivity extends BaseActivity {
         int listSize = list.size();
         int offset = mGridViewLayoutMgr.getSpanCount();
         seriesGroupOptions.clear();
-        GroupCount=(offset==3 || offset==6)?30:20;
+        GroupCount=(offset==3 || offset==6)?60:50;
         if(listSize>100 && listSize<=400)GroupCount=60;
         if(listSize>400)GroupCount=120;
         if(listSize > GroupCount) {
@@ -613,16 +612,16 @@ public class DetailActivity extends BaseActivity {
                     vodInfo.setVideo(mVideo);
                     vodInfo.sourceKey = mVideo.sourceKey;
                     sourceKey = mVideo.sourceKey;
-
+                    tvNote.setText(mVideo.note);
                     tvName.setText(mVideo.name);
                     setTextShow(tvSite, "来源：", ApiConfig.get().getSource(firstsourceKey).getName());
-                    setTextShow(tvYear, "年份：", mVideo.year == 0 ? "" : String.valueOf(mVideo.year));
-                    setTextShow(tvArea, "地区：", mVideo.area);
-                    setTextShow(tvLang, "语言：", mVideo.lang);
+                    setTextShow(tvYear, "", mVideo.year == 0 ? "" : String.valueOf(mVideo.year));
+                    setTextShow(tvArea, "•", mVideo.area);
+                   // setTextShow(tvLang, "语言：", mVideo.lang);
                     if (!firstsourceKey.equals(sourceKey)) {
-                    	setTextShow(tvType, "类型：", "[" + ApiConfig.get().getSource(sourceKey).getName() + "] 解析");
+                    	setTextShow(tvType, "类型", "[" + ApiConfig.get().getSource(sourceKey).getName() + "] 解析");
                     } else {
-                    	setTextShow(tvType, "类型：", mVideo.type);
+                    	setTextShow(tvType, "类型", mVideo.type);
                     }
                     setTextShow(tvActor, "演员：", mVideo.actor);
                     setTextShow(tvDirector, "导演：", mVideo.director);
@@ -677,8 +676,6 @@ public class DetailActivity extends BaseActivity {
                             } else
                                 flag.selected = false;
                         }
-                        //设置播放地址
-                        setTextShow(tvPlayUrl, "播放地址：", vodInfo.seriesMap.get(vodInfo.playFlag).get(0).url);
                         seriesFlagAdapter.setNewData(vodInfo.seriesFlags);
                         mGridViewFlag.scrollToPosition(flagScrollTo);
 
@@ -710,7 +707,19 @@ public class DetailActivity extends BaseActivity {
         if (content == null) {
             content = "";
         }
-        return label + "<font color=\"#FFFFFF\">" + content + "</font>";
+        if (label == "类型") {
+            content = content.replace(","," • ");
+            content = content.replace("/","•");
+            return " • " + content;
+        }
+        if (label.contains("演员")) {
+            content = content.replace(","," / ");
+            return label + content;
+        }
+        if (label.length() == 1) {
+            return label + " " + content + " ";
+        }
+        return label +  content + " ";
     }
 
     private void initData() {

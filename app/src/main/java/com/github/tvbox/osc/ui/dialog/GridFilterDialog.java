@@ -14,8 +14,11 @@ import androidx.annotation.NonNull;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.github.tvbox.osc.R;
+import com.github.tvbox.osc.base.BaseLazyFragment;
 import com.github.tvbox.osc.bean.MovieSort;
+import com.github.tvbox.osc.ui.activity.HomeActivity;
 import com.github.tvbox.osc.ui.adapter.GridFilterKVAdapter;
+import com.github.tvbox.osc.ui.fragment.GridFragment;
 import com.owen.tvrecyclerview.widget.TvRecyclerView;
 import com.owen.tvrecyclerview.widget.V7LinearLayoutManager;
 
@@ -39,7 +42,7 @@ public class GridFilterDialog extends BaseDialog {
     }
 
     public void setOnDismiss(Callback callback) {
-        setOnDismissListener(new DialogInterface.OnDismissListener() {
+        setOnDismissListener(new OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialogInterface) {
                 if (selectChange) {
@@ -103,7 +106,7 @@ public class GridFilterDialog extends BaseDialog {
         layoutParams.gravity = Gravity.BOTTOM;
         layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
         layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        layoutParams.dimAmount = 0f;
+        //layoutParams.dimAmount = 0f;
         getWindow().getDecorView().setPadding(0, 0, 0, 0);
         getWindow().setAttributes(layoutParams);
     }
