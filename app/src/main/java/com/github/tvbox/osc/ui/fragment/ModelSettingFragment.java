@@ -27,6 +27,7 @@ import com.github.tvbox.osc.ui.dialog.BackupDialog;
 import com.github.tvbox.osc.ui.dialog.SearchRemoteTvDialog;
 import com.github.tvbox.osc.ui.dialog.SelectDialog;
 import com.github.tvbox.osc.ui.dialog.XWalkInitDialog;
+import com.github.tvbox.osc.util.AppManager;
 import com.github.tvbox.osc.util.FastClickCheckUtil;
 import com.github.tvbox.osc.util.FileUtils;
 import com.github.tvbox.osc.util.HawkConfig;
@@ -210,13 +211,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
                         public void click(SourceBean value, int pos) {
                             ApiConfig.get().setSourceBean(value);
                             tvHomeApi.setText(ApiConfig.get().getHomeSourceBean().getName());
-
-                            Intent intent =new Intent(mContext, HomeActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            Bundle bundle = new Bundle();
-                            bundle.putBoolean("useCache", true);
-                            intent.putExtras(bundle);
-                            startActivity(intent);
+                            reloadActivity();
                         }
 
                         @Override
@@ -599,6 +594,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 FastClickCheckUtil.check(v);
                 Hawk.put(HawkConfig.HOME_REC_STYLE, !Hawk.get(HawkConfig.HOME_REC_STYLE, false));
                 tvRecStyleText.setText(Hawk.get(HawkConfig.HOME_REC_STYLE, false) ? "是" : "否");
+                reloadActivity();
             }
         });
 
@@ -711,6 +707,14 @@ public class ModelSettingFragment extends BaseLazyFragment {
             return "文字列表";
         } else {
             return "缩略图";
+        }
+    }
+    void reloadActivity() {
+        if (AppManager.getInstance().isActivity()) {
+            Bundle bundle = new Bundle();
+            bundle.putBoolean("useCache", true);
+            BaseActivity currActivity = (BaseActivity) AppManager.getInstance().currentActivity();
+            currActivity.jumpActivity(HomeActivity.class, bundle);
         }
     }
 }
