@@ -130,7 +130,7 @@
     <FrameLayout
         android:id="@+id/llgrids"
         android:layout_width="@dimen/vs_190"
-        android:layout_height="@dimen/vs_290">
+        android:layout_height="@dimen/vs_285">
 
         <TextView
             android:id="@+id/tvName"
