@@ -42,7 +42,7 @@
 -keep public class * extends android.app.backup.BackupAgentHelper
 -keep public class * extends android.preference.Preference
 -keep public class * extends android.view.View
--keep public class com.android.vending.licensing.ILicensingService
+-keep public class com.android.vending.licensing.ILicensingService.**
 
 # 保留support下的所有类及其内部类
 -keep class android.support.** {*;}
@@ -208,6 +208,6 @@
 # Zxing
 -keep class com.google.zxing.**{*;}
 -keepclassmembers enum * {
-    public static [] values();
+    public static **[] values();
     public static ** valueOf(java.lang.String);
 }

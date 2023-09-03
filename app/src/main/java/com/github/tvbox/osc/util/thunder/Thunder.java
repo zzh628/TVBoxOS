@@ -165,6 +165,7 @@ public class Thunder {
                                                                     torrentFileInfoArrayList.add(sub);
                                                                 }
                                                             }
+
                                                             isParse=true;
                                                             break outerLoop;
                                                         }

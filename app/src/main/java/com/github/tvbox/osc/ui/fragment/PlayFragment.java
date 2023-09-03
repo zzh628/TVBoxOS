@@ -599,7 +599,8 @@ public class PlayFragment extends BaseLazyFragment {
                         boolean hasCh =false;
                         for(TrackInfoBean subtitleTrackInfoBean : subtitleTrackList) {
                             String lowerLang = subtitleTrackInfoBean.language.toLowerCase();
-                            if (lowerLang.startsWith("zh") || lowerLang.startsWith("ch")) {
+                            if (lowerLang.contains("zh") || lowerLang.contains("ch")) {
+                                hasCh=true;
                                 if (selectedIndex != subtitleTrackInfoBean.index) {
                                     ((IjkMediaPlayer)(mVideoView.getMediaPlayer())).setTrack(subtitleTrackInfoBean.index);
                                     break;
